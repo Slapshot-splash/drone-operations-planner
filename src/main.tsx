@@ -107,7 +107,7 @@ function App() {
           <div className="modal-actions"><button type="button" className="secondary-button" onClick={step===0?closePlanner:previousStep}>{step===0?'Sluiten':'← Vorige'}</button>{step<steps.length-1?<button type="button" className="primary-button" onClick={nextStep}>Volgende →</button>:<button type="button" className="primary-button" onClick={finishOperation}>Operatie opslaan</button>}</div>
         </div>
       </div></div>
-    </div></div>}
+    </div>}
   </div>
 }
 
