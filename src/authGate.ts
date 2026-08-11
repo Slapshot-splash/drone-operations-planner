@@ -3,6 +3,7 @@ import { supabase, supabaseConfigured } from './lib/supabase'
 const root = document.getElementById('root')
 
 if (root && supabaseConfigured && supabase) {
+  const client = supabase
   const gate = document.createElement('div')
   gate.id = 'auth-gate'
   gate.innerHTML = `
@@ -69,12 +70,12 @@ if (root && supabaseConfigured && supabase) {
     message.classList.remove('error')
 
     const result = signUpMode
-      ? await supabase.auth.signUp({
+      ? await client.auth.signUp({
           email: email.value.trim(),
           password: password.value,
           options: { emailRedirectTo: window.location.origin },
         })
-      : await supabase.auth.signInWithPassword({
+      : await client.auth.signInWithPassword({
           email: email.value.trim(),
           password: password.value,
         })
@@ -96,11 +97,11 @@ if (root && supabaseConfigured && supabase) {
     gate.remove()
   })
 
-  supabase.auth.getSession().then(({ data }) => {
+  client.auth.getSession().then(({ data }) => {
     if (data.session) gate.remove()
   })
 
-  supabase.auth.onAuthStateChange((_event, session) => {
+  client.auth.onAuthStateChange((_event, session) => {
     if (session) gate.remove()
   })
 }
