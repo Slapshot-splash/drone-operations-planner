@@ -37,6 +37,12 @@ function mapOperation(row: any): StoredOperation {
   }
 }
 
+function normalizeStatus(status?: string) {
+  if (status === 'ready') return 'ready'
+  if (status === 'completed') return 'completed'
+  return 'draft'
+}
+
 export async function listOperations(): Promise<StoredOperation[]> {
   await requireUser()
   const { data, error } = await supabase!
@@ -64,7 +70,7 @@ export async function createOperation(values: {
       location_name: values.location,
       operation_date: values.date || null,
       classification_category: values.category,
-      status: 'Concept',
+      status: 'draft',
       planner_data: values.plannerData,
     })
     .select(operationSelect)
@@ -91,7 +97,7 @@ export async function updateOperation(id: string, values: {
       location_name: values.location,
       operation_date: values.date || null,
       classification_category: values.category,
-      status: values.status ?? 'Concept',
+      status: normalizeStatus(values.status),
       planner_data: values.plannerData,
     })
     .eq('id', id)
