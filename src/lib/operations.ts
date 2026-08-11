@@ -13,9 +13,14 @@ export type StoredOperation = {
 async function requireUser() {
   if (!supabase) throw new Error('Supabase is niet geconfigureerd.')
   const { data, error } = await supabase.auth.getUser()
-  if (error) throw error
+  if (error) throw new Error(`Inloggen controleren mislukt: ${error.message}`)
   if (!data.user) throw new Error('Je bent niet ingelogd.')
   return data.user
+}
+
+function formatSupabaseError(context: string, error: { message?: string; details?: string; hint?: string; code?: string }) {
+  const parts = [error.message, error.details, error.hint, error.code ? `code ${error.code}` : ''].filter(Boolean)
+  return `${context}: ${parts.join(' — ') || 'onbekende Supabase-fout'}`
 }
 
 export async function listOperations(): Promise<StoredOperation[]> {
@@ -25,7 +30,7 @@ export async function listOperations(): Promise<StoredOperation[]> {
     .select('id,name,location,date,category,status,planner_data')
     .order('created_at', { ascending: false })
 
-  if (error) throw error
+  if (error) throw new Error(formatSupabaseError('Operaties laden mislukt', error))
   return (data ?? []) as StoredOperation[]
 }
 
@@ -51,7 +56,8 @@ export async function createOperation(values: {
     .select('id,name,location,date,category,status,planner_data')
     .single()
 
-  if (error) throw error
+  if (error) throw new Error(formatSupabaseError('Nieuwe operatie aanmaken mislukt', error))
+  if (!data) throw new Error('Nieuwe operatie aanmaken mislukt: Supabase gaf geen aangemaakte rij terug.')
   return data as StoredOperation
 }
 
@@ -76,7 +82,7 @@ export async function updateOperation(id: string, values: {
     })
     .eq('id', id)
 
-  if (error) throw error
+  if (error) throw new Error(formatSupabaseError('Operatie opslaan mislukt', error))
 }
 
 export async function getOperation(id: string): Promise<StoredOperation> {
@@ -87,6 +93,6 @@ export async function getOperation(id: string): Promise<StoredOperation> {
     .eq('id', id)
     .single()
 
-  if (error) throw error
+  if (error) throw new Error(formatSupabaseError('Operatie laden mislukt', error))
   return data as StoredOperation
 }
