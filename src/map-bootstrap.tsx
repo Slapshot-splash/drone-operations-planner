@@ -1,6 +1,7 @@
 import { createRoot } from 'react-dom/client'
 import React, { useState } from 'react'
 import OperationMap from './components/OperationMap'
+import './map.css'
 
 type SavedPosition = [number, number] | null
 
