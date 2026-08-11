@@ -11,7 +11,8 @@
   "dependencies": {
     "leaflet": "latest",
     "react": "latest",
-    "react-dom": "latest"
+    "react-dom": "latest",
+    "react-leaflet": "latest"
   },
   "devDependencies": {
     "@types/leaflet": "latest",
