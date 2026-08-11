@@ -23,15 +23,29 @@ function formatSupabaseError(context: string, error: { message?: string; details
   return `${context}: ${parts.join(' — ') || 'onbekende Supabase-fout'}`
 }
 
+const operationSelect = 'id,name,location_name,operation_date,classification_category,status,planner_data'
+
+function mapOperation(row: any): StoredOperation {
+  return {
+    id: row.id,
+    name: row.name,
+    location: row.location_name ?? '',
+    date: row.operation_date ?? null,
+    category: row.classification_category ?? '',
+    status: row.status,
+    planner_data: row.planner_data ?? {},
+  }
+}
+
 export async function listOperations(): Promise<StoredOperation[]> {
   await requireUser()
   const { data, error } = await supabase!
     .from('operations')
-    .select('id,name,location,date,category,status,planner_data')
+    .select(operationSelect)
     .order('created_at', { ascending: false })
 
   if (error) throw new Error(formatSupabaseError('Operaties laden mislukt', error))
-  return (data ?? []) as StoredOperation[]
+  return (data ?? []).map(mapOperation)
 }
 
 export async function createOperation(values: {
@@ -47,18 +61,18 @@ export async function createOperation(values: {
     .insert({
       user_id: user.id,
       name: values.name,
-      location: values.location,
-      date: values.date || null,
-      category: values.category,
+      location_name: values.location,
+      operation_date: values.date || null,
+      classification_category: values.category,
       status: 'Concept',
       planner_data: values.plannerData,
     })
-    .select('id,name,location,date,category,status,planner_data')
+    .select(operationSelect)
     .single()
 
   if (error) throw new Error(formatSupabaseError('Nieuwe operatie aanmaken mislukt', error))
   if (!data) throw new Error('Nieuwe operatie aanmaken mislukt: Supabase gaf geen aangemaakte rij terug.')
-  return data as StoredOperation
+  return mapOperation(data)
 }
 
 export async function updateOperation(id: string, values: {
@@ -74,9 +88,9 @@ export async function updateOperation(id: string, values: {
     .from('operations')
     .update({
       name: values.name,
-      location: values.location,
-      date: values.date || null,
-      category: values.category,
+      location_name: values.location,
+      operation_date: values.date || null,
+      classification_category: values.category,
       status: values.status ?? 'Concept',
       planner_data: values.plannerData,
     })
@@ -89,10 +103,10 @@ export async function getOperation(id: string): Promise<StoredOperation> {
   await requireUser()
   const { data, error } = await supabase!
     .from('operations')
-    .select('id,name,location,date,category,status,planner_data')
+    .select(operationSelect)
     .eq('id', id)
     .single()
 
   if (error) throw new Error(formatSupabaseError('Operatie laden mislukt', error))
-  return data as StoredOperation
+  return mapOperation(data)
 }
