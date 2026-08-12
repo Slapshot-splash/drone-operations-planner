@@ -75,6 +75,7 @@ if (root && supabaseConfigured && supabase) {
           : 'Log in om je operaties veilig op te slaan en later verder te gaan.'
 
     emailLabel.classList.toggle('auth-hidden', reset)
+    email.required = !reset
     passwordLabel.querySelector('input')!.setAttribute('autocomplete', reset ? 'new-password' : signup ? 'new-password' : 'current-password')
     passwordConfirmLabel.classList.toggle('auth-hidden', !reset)
     password.required = !forgotMode
